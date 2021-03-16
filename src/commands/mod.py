@@ -9,7 +9,7 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from src.commands.connect_db import connection, generate_random
+from src.commands.utils import connection, generate_random
 import src.commands
 import sqlalchemy
 import config
