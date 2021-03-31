@@ -227,7 +227,7 @@ async def stats(message):
     embedVar = discord.Embed(title="<:wiilink24:818538825948987512> WiiLink24 Service Stats", color=0x00ff00)
     embedVar.add_field(name="Public Beta:", value='```yaml\n+ Wii no Ma\n+ Wii Fit Body Check Channel```', inline=False)
     embedVar.add_field(name="Private Beta:", value='```fix\n* Digicam Print Channel```', inline=False)
-    embedVar.add_field(name="In Development", value='```fix\n*Demae Channel```', inline=False)
+    embedVar.add_field(name="In Development", value='```fix\n* Demae Channel```', inline=False)
     embedVar.add_field(name="Not in Development:",
                        value='```diff\n- Dokodemo Wii no Ma\n- TV no Tomo Channel G Guide for Wii```', inline=False)
     await message.channel.send(embed=embedVar)
