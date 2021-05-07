@@ -125,6 +125,14 @@ class Misc(commands.Cog):
         )
         await message.channel.send(title, embed=embed)
 
+    @commands.command()
+    async def hex_to_str(self, ctx, hex):
+        no_whitespace = hex.replace(" ", "")
+
+        de_hex = bytearray.fromhex(no_whitespace).decode()
+
+        await ctx.channel.send(de_hex)
+
 
 def setup(bot):
     bot.add_cog(Misc(bot))
