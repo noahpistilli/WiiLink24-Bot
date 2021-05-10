@@ -12,5 +12,6 @@ bot = commands.Bot(command_prefix='/')
 
 bot.load_extension("src.commands.misc")
 bot.load_extension("src.commands.mod")
+bot.load_extension("src.commands.events")
 
 bot.run(TOKEN)
