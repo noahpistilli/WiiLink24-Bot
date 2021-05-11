@@ -1,7 +1,10 @@
 import discord
+import asyncio
 
 from discord.ext import commands
+from discord.ext.commands import MemberConverter
 from src.commands.helpers import timestamp
+from src.commands.database import check_user
 
 
 class Mods(commands.Cog):
@@ -20,6 +23,7 @@ class Mods(commands.Cog):
                 value=f"{username}has cleared {clear} messages.",
             )
             await ctx.channel.purge(limit=clear)
+            await asyncio.sleep(1)
             await ctx.channel.send(f"I have cleared {number} messages.")
 
             await channel.send(timestamp, embed=clearedmessages)
@@ -69,7 +73,7 @@ class Mods(commands.Cog):
             await ctx.channel.send("You don't have the correct permissions.")
 
     @commands.command(name="kick")
-    async def kick(self, ctx, user: discord.Member, *, reason="No reason provided"):
+    async def kick(self, ctx, user: discord.User, *, reason="No reason provided"):
         if ctx.author.guild_permissions.ban_members:
             kick = discord.Embed(
                 title=f":hammer:Successfully kicked {user}",
@@ -82,6 +86,36 @@ class Mods(commands.Cog):
             await channel.send(embed=kick)
         else:
             await ctx.channel.send("You don't have the correct permissions.")
+
+    @commands.command()
+    async def check(self, ctx, *, user: discord.User):
+        banned = "No"
+        reason = ""
+        muted = "Not In Server"
+        userid = user.id
+        banned_members = await ctx.guild.bans()
+
+        for ban_entry in banned_members:
+            useri = {
+                "user_id": ban_entry.user.id,
+                "reason": ban_entry.reason
+            }
+
+            if useri["user_id"] == userid:
+                try:
+                    converter = MemberConverter()
+                    string = r'{}'.format(user.id)
+                    member = await converter.convert(ctx, string)
+                    role = discord.utils.find(lambda r: r.name == 'Muted', ctx.message.guild.roles)
+                    if role in member.roles:
+                        muted = "Yes"
+                except discord.ext.commands.errors.MemberNotFound:
+                    banned = "Yes"
+                    before_reason = useri["reason"]
+                    reason = f"(`{before_reason}`)"
+                    muted = "Not In Server"
+
+        await ctx.channel.send(check_user(user, userid, banned, reason, muted))
 
 
 def setup(bot):
