@@ -4,7 +4,6 @@ import contextlib
 import random
 
 import textwrap
-from discord_slash import cog_ext, SlashContext
 from traceback import format_exception
 
 from discord.ext import commands
@@ -16,10 +15,6 @@ fmt = "%a, %d %b %Y | %H:%M:%S %ZGMT"
 class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    @cog_ext.cog_slash(name="dice")
-    async def dice(self, ctx: SlashContext):
-        await ctx.send(content=random.randint(1, 6))
 
     @commands.command(pass_context=True)
     async def about(self, message):
