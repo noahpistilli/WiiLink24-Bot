@@ -9,7 +9,7 @@ import time
 from models import UserInfo
 from discord.ext import commands
 from src.commands.helpers import timestamp, check_role
-from src.commands.connect_db import session
+from src.commands.database import session
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
