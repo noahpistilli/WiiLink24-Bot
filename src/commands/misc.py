@@ -1,7 +1,14 @@
 import discord
+import io
+import contextlib
+import random
+
+import textwrap
+from discord_slash import cog_ext, SlashContext
+from traceback import format_exception
 
 from discord.ext import commands
-from src.commands.helpers import generate_random
+from src.commands.helpers import generate_random, Pag, clean_code
 
 fmt = "%a, %d %b %Y | %H:%M:%S %ZGMT"
 
@@ -9,6 +16,10 @@ fmt = "%a, %d %b %Y | %H:%M:%S %ZGMT"
 class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @cog_ext.cog_slash(name="dice")
+    async def dice(self, ctx: SlashContext):
+        await ctx.send(content=random.randint(1, 6))
 
     @commands.command(pass_context=True)
     async def about(self, message):
@@ -29,7 +40,7 @@ class Misc(commands.Cog):
         await message.channel.send(text, embed=embed)
 
     @commands.command(name="avy", aliases=["avatar"])
-    async def avatar(self, ctx, *, user: discord.Member = None):
+    async def avatar(self, ctx, *, user: discord.User = None):
         if user is None:
             user = ctx.author
         embed = discord.Embed(color=0x00FF00)
@@ -38,7 +49,7 @@ class Misc(commands.Cog):
         await ctx.channel.send(embed=embed)
 
     @commands.command(name="riitag", aliases=["tag"])
-    async def riitag(self, ctx, *, username: discord.Member = None):
+    async def riitag(self, ctx, *, username: discord.User = None):
         if username is None:
             username = ctx.author
         randomizer = generate_random(6)
@@ -49,6 +60,27 @@ class Misc(commands.Cog):
             url=f"https://tag.rc24.xyz/{user}/tag.max.png?randomizer=0.{randomizer}"
         )
         await ctx.channel.send(embed=em)
+
+    @commands.command()
+    async def table(self, ctx):
+        embed = discord.Embed(colour=0x00FF00)
+        embed.set_footer(text="Wii no Ma Tables", icon_url=ctx.guild.icon_url)
+        embed.set_image(url="https://cdn.discordapp.com/attachments/750623609810190348/842808566003793940/NEWTables.png")
+        await ctx.channel.send(embed=embed)
+
+    @commands.command(name="digicard", aliases=["card"])
+    async def digicard(self, ctx, *, username: discord.Member = None):
+        if username is None:
+            username = ctx.author
+        randomizer = generate_random(6)
+        user = username.id
+        em = discord.Embed(color=0x00FF00)
+        em.set_author(name=f"{username}'s Digicard", icon_url=username.avatar_url)
+        em.set_image(
+            url=f"https://card-3b2.wiilink24.com/cards/{user}.jpg?randomizer=0.{randomizer}"
+        )
+        await ctx.channel.send(embed=em)
+
 
     @commands.command(pass_context=True)
     async def userinfo(self, ctx, *, user: discord.Member = None):
@@ -94,13 +126,13 @@ class Misc(commands.Cog):
             inline=False,
         )
         embedVar.add_field(
-            name="Private Beta:",
-            value="```fix\n* Wii Fit Body Check Channel```",
+            name="Development",
+            value="```fix\n* Wii Fit Body Check Channel\n* Dokodemo Wii no Ma```",
             inline=False,
         )
         embedVar.add_field(
             name="Not in Development:",
-            value="```diff\n- Dokodemo Wii no Ma\n- TV no Tomo Channel G Guide for Wii```",
+            value="```diff\n- TV no Tomo Channel G Guide for Wii```",
             inline=False,
         )
         await message.channel.send(embed=embedVar)
@@ -125,29 +157,46 @@ class Misc(commands.Cog):
         )
         await message.channel.send(title, embed=embed)
 
-    @commands.command()
-    async def hex_to_str(self, ctx, hex):
-        no_whitespace = hex.replace(" ", "")
 
-        de_hex = bytearray.fromhex(no_whitespace).decode()
+    @commands.command(name="eval", aliases=["exec"])
+    @commands.is_owner()
+    async def _eval(self, ctx, *, code):
+        code = clean_code(code)
 
-        await ctx.channel.send(de_hex)
+        local_variables = {
+            "discord": discord,
+            "commands": commands,
+            "bot": self.bot,
+            "ctx": ctx,
+            "channel": ctx.channel,
+            "author": ctx.author,
+            "guild": ctx.guild,
+            "message": ctx.message,
+        }
+
+        stdout = io.StringIO()
+
+        try:
+            with contextlib.redirect_stdout(stdout):
+                exec(
+                    f"async def func():\n{textwrap.indent(code, '    ')}", local_variables,
+                )
+
+                obj = await local_variables["func"]()
+                result = f"{stdout.getvalue()}\n-- {obj}\n"
+        except Exception as e:
+            result = "".join(format_exception(e, e, e.__traceback__))
+
+        pager = Pag(
+            timeout=100,
+            entries=[result[i: i + 2000] for i in range(0, len(result), 2000)],
+            length=1,
+            prefix="```py\n",
+            suffix="```"
+        )
+
+        await pager.start(ctx)
 
 
 def setup(bot):
     bot.add_cog(Misc(bot))
-
-
-###################################################################################################################
-# @bot.command(name='apply')                                                                                      #
-# async def apps(ctx, *, username: discord.Member = None):                                                        #
-#    if username is None:                                                                                         #
-#        username = ctx.author                                                                                    #
-#   user = username.id                                                                                            #
-#    bruv = await username.create_dm()                                                                            #
-#    user = username.id                                                                                           #
-#    embed = discord.Embed(color=0x00ff00)                                                                        #
-#    embed.add_field(name="To Apply:", value="Go to your DM's and click the link provided by WiiLink24 Bot.")     #
-#    await ctx.channel.send(embed=embed)                                                                          #
-#    await bruv.send(f"Click the link below to apply for mod!\nhttps://tripetto.app/run/849CLXP5VM?userid={user}")#
-###################################################################################################################
