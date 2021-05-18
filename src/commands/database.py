@@ -1,22 +1,16 @@
-import psycopg2
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
+SQL_ALCHEMY_URI = "postgresql://Sketch:2006@127.0.0.1/wl24bot"
 
-def check_user(username, user_id, check_ban, reason, muted):
-    global strikes
-    connection = psycopg2.connect(user="user",
-                                  password="pass",
-                                  host="127.0.0.1",
-                                  port="5432",
-                                  database="db")
-    cursor = connection.cursor()
-    cursor.execute(f"SELECT * from userinfo WHERE userid = {user_id}")
-    record = cursor.fetchall()
+engine = create_engine(
+    SQL_ALCHEMY_URI
+)
 
-    if len(record) > 0:
-        for row in record:
-            strikes = row[1]
-    else:
-        strikes = 0
+Session = sessionmaker()
+Session.configure(bind=engine)
 
-    return f":white_check_mark: Moderation Information for **{username}** (ID:{user_id}): " \
-           f"\n:triangular_flag_on_post: Strikes: **{strikes}**\n:mute: Muted: **{muted}**\n:hammer: Banned: **{check_ban}** {reason}"
+session = Session()
+
+Base = declarative_base()
