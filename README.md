@@ -14,3 +14,8 @@ I wouldn't because there are probably better bots out there, but here we go
 7. Run `python3 wiilink24.py`
 8. You win!
 
+### Contributing
+
+The repo can now be found at [WiiLink24-Bot](https://github.com/WiiLink24/WiiLink24-Bot)
+
+I will not be accepting anymore PR's here.
