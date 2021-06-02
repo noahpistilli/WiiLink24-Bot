@@ -13,5 +13,4 @@ bot.load_extension("src.commands.events")
 bot.load_extension("src.commands.converters")
 
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
-bot.run(TOKEN)
+bot.run(os.getenv('DISCORD_TOKEN'))
